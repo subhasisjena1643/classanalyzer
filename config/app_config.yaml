@@ -1,0 +1,175 @@
+# PIPER - AI Classroom Analyzer Configuration
+# This file contains default configuration settings for the application
+
+# Application Settings
+app:
+  name: "PIPER AI Classroom Analyzer"
+  version: "1.0.0"
+  debug: false
+  log_level: "INFO"
+
+# Camera Configuration
+camera:
+  # Camera device ID (0 for default camera, 1 for external camera, etc.)
+  device_id: 0
+  
+  # Video resolution (width, height)
+  resolution:
+    width: 1280
+    height: 720
+  
+  # Target FPS for video processing
+  fps_target: 30
+  
+  # Camera settings
+  auto_exposure: true
+  brightness: 0.5
+  contrast: 0.5
+
+# AI Model Configuration
+ai_models:
+  # Face Detection Settings
+  face_detection:
+    model: "mediapipe"  # Options: mediapipe, yolo, ensemble
+    confidence_threshold: 0.7
+    max_faces: 10
+    
+  # Face Recognition Settings
+  face_recognition:
+    model: "facenet_style"  # Using face_recognition library with FaceNet-style processing
+    embedding_dimension: 512
+    similarity_threshold: 0.6
+    
+  # Engagement Analysis
+  engagement:
+    model: "transformer"
+    update_interval: 1.0  # seconds
+    smoothing_factor: 0.8
+    
+  # Eye Tracking
+  eye_tracking:
+    enabled: true
+    model: "cnn"
+    gaze_threshold: 0.5
+
+# Face Tracking & Persistence
+tracking:
+  # Alert system for missing faces
+  alert_duration: 30  # seconds
+  missing_threshold: 1.0  # seconds before considering face "missing"
+  
+  # Tracking parameters
+  max_tracking_distance: 100  # pixels
+  tracking_smoothing: 0.7
+  re_identification_threshold: 0.8
+  
+  # Visual settings
+  box_colors:
+    detection: [0, 255, 0]  # Green for detection
+    tracking: [0, 0, 255]   # Red for tracking
+    alert: [255, 0, 0]      # Red for alerts
+  
+  box_thickness: 2
+  font_scale: 0.7
+
+# Reinforcement Learning
+reinforcement_learning:
+  enabled: true
+  algorithm: "PPO"  # Proximal Policy Optimization
+  
+  # Training parameters
+  learning_rate: 0.001
+  batch_size: 64
+  training_interval: 5  # Process RL every N frames
+  episode_length: 100   # Steps per episode
+  
+  # Checkpoint settings
+  save_interval: 25     # Save every N episodes
+  checkpoint_dir: "checkpoints"
+  max_checkpoints: 10   # Keep only latest N checkpoints
+  
+  # Reward system
+  rewards:
+    detection: 0.1      # Reward per face detected
+    tracking: 0.2       # Reward per tracked object
+    engagement: 0.3     # Weight for engagement score
+    attention: 0.3      # Weight for attention level
+
+# Performance Optimization
+performance:
+  # Processing intervals
+  ai_processing_interval: 5  # Process AI every N frames for performance
+  cleanup_interval: 300      # Cleanup every N seconds
+  
+  # Memory management
+  max_memory_usage: 4096     # MB
+  aggressive_cleanup: false
+  
+  # GPU settings
+  use_gpu: true
+  gpu_memory_fraction: 0.8
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file_logging: true
+  log_directory: "logs"
+  max_log_files: 10
+  log_rotation_size: "10MB"
+
+# Privacy & Security
+privacy:
+  # Face anonymization (blur faces in recordings)
+  anonymize_faces: false
+  
+  # Data retention
+  auto_delete_logs: true
+  log_retention_days: 30
+  
+  # Consent management
+  require_consent: false
+  consent_timeout: 300  # seconds
+
+# Export & Analytics
+analytics:
+  # Real-time dashboard
+  dashboard_enabled: true
+  dashboard_port: 8080
+  
+  # Data export
+  export_format: "json"  # json, csv, xml
+  export_interval: 3600  # seconds
+  
+  # Metrics tracking
+  track_performance: true
+  track_accuracy: true
+
+# Development & Testing
+development:
+  # Debug settings
+  show_debug_info: false
+  save_debug_frames: false
+  debug_output_dir: "debug"
+  
+  # Testing
+  mock_camera: false
+  test_mode: false
+  
+  # Profiling
+  enable_profiling: false
+  profile_output_dir: "profiles"
+
+# Advanced Features
+advanced:
+  # Multi-camera support (future feature)
+  multi_camera: false
+  camera_sync: true
+  
+  # Custom models
+  custom_model_path: null
+  model_ensemble: true
+  
+  # API settings
+  api_enabled: false
+  api_port: 8000
+  api_host: "localhost"

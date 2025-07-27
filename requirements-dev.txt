@@ -1,0 +1,46 @@
+# Development Dependencies for PIPER - AI Classroom Analyzer
+# These packages are only needed for development, testing, and code quality
+
+# Testing Framework
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
+pytest-xdist>=3.0.0
+
+# Code Formatting and Linting
+black>=23.0.0
+isort>=5.12.0
+flake8>=6.0.0
+mypy>=1.0.0
+pylint>=2.17.0
+
+# Security and Quality
+bandit>=1.7.0
+safety>=2.3.0
+pre-commit>=3.0.0
+
+# Documentation
+sphinx>=6.0.0
+sphinx-rtd-theme>=1.2.0
+myst-parser>=1.0.0
+
+# Development Tools
+ipython>=8.0.0
+jupyter>=1.0.0
+notebook>=6.5.0
+
+# Performance Profiling
+memory-profiler>=0.60.0
+line-profiler>=4.0.0
+py-spy>=0.3.0
+
+# Build Tools
+build>=0.10.0
+twine>=4.0.0
+wheel>=0.40.0
+
+# Type Checking
+types-requests>=2.28.0
+types-PyYAML>=6.0.0
+types-setuptools>=67.0.0

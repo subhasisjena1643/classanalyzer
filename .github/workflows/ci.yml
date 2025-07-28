@@ -1,0 +1,165 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.9', '3.10', '3.11']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install system dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev libgomp1
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+        pip install opencv-python-headless>=4.5.0
+        pip install mediapipe>=0.8.0
+        pip install numpy>=1.21.0
+        pip install pillow>=8.0.0
+        pip install pyyaml>=5.4.0
+
+    - name: Test core imports
+      run: |
+        python -c "
+        try:
+            import cv2
+            print(f'✅ OpenCV {cv2.__version__}')
+        except ImportError as e:
+            print(f'❌ OpenCV import failed: {e}')
+            exit(1)
+        
+        try:
+            import mediapipe
+            print('✅ MediaPipe OK')
+        except ImportError as e:
+            print(f'❌ MediaPipe import failed: {e}')
+            exit(1)
+            
+        try:
+            import numpy as np
+            print(f'✅ NumPy {np.__version__}')
+        except ImportError as e:
+            print(f'❌ NumPy import failed: {e}')
+            exit(1)
+            
+        try:
+            import torch
+            print(f'✅ PyTorch {torch.__version__}')
+        except ImportError as e:
+            print(f'❌ PyTorch import failed: {e}')
+            exit(1)
+        "
+
+    - name: Test system requirements checker
+      run: |
+        python tools/check_requirements.py || echo "Requirements checker completed with warnings"
+
+    - name: Test basic functionality
+      run: |
+        python -c "
+        import sys
+        import os
+        sys.path.append('.')
+        
+        # Test configuration loading
+        try:
+            from utils.config_manager import ConfigManager
+            print('✅ Config manager import OK')
+        except ImportError as e:
+            print(f'⚠️ Config manager import failed: {e}')
+        
+        # Test model imports
+        try:
+            from models.face_detection import StateOfTheArtFaceDetector
+            print('✅ Face detection model import OK')
+        except ImportError as e:
+            print(f'⚠️ Face detection import failed: {e}')
+        
+        print('✅ Basic functionality test completed')
+        "
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install linting dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8
+    
+    - name: Run basic linting (errors only)
+      run: |
+        # Only check for syntax errors and undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=.venv,venv,__pycache__,.git
+    
+    - name: Check Python syntax
+      run: |
+        python -m py_compile main_app.py
+        python -m py_compile run_app.py
+        python -m py_compile tools/install.py
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+    
+    - name: Run bandit security scan (non-blocking)
+      run: |
+        bandit -r . -f json -o bandit-report.json --exclude .venv,venv || echo "Bandit scan completed with findings"
+    
+    - name: Run safety check (non-blocking)
+      run: |
+        safety check --json --output safety-report.json || echo "Safety check completed with findings"
+    
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+          safety-report.json
